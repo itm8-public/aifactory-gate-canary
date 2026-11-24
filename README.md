@@ -19,16 +19,25 @@ Each case is a branch with one commit on top of `main`, and an open **draft** pu
 | `canary/platform`          | An infrastructure file (`infra/main.bicep`) | `needs-person` (CI, deployment or infrastructure)    |
 | `canary/ai-values-missing` | A clean change; the AI review on, values empty | `needs-person` (the AI review values are missing) |
 | `canary/ai-review`         | A clean change; the AI review fully on     | `pass` with the "In plain words" explanation (only when this repository's AI review variables are set) |
+| `canary/describes-review`  | A README section that explains the gate and the AI review; the AI review fully on | `pass`: describing the review is not steering it. Then its merge is pushed (below) |
 
 The caller is [`.github/workflows/aifactory-gate.yml`](.github/workflows/aifactory-gate.yml). It
-calls `gate.yml@v0-next` on zone green, level 2, and turns the AI review on by branch name.
+calls `gate.yml@v0-next` on zone green, level 2, and turns the AI review on by branch name. It
+grants `actions: read` (a push reuses a pull request's verdict) and `pull-requests: write` (the
+gate's comment on the pull request).
+
+**The push of a merge.** After the `canary/describes-review` run, the canary pushes a merge commit
+of that pull request (the tree the run judged, on the base it judged it against) to
+`canary-push/describes-review`, as a merge to `main` would push it. That push run must reuse the
+pull request run's verdict instead of running again. The `canary-push/` branches are written by the
+canary only and moved with force on every run.
 
 ## How it runs
 
 A gate maintainer runs `node scripts/canary.mjs` from a clone of the gate repository, signed in
 with the GitHub CLI. It pushes an empty commit to each case branch (a push by a person starts the
 workflow; one made with the workflow token would not), waits for the runs, checks the verdict, the
-`gate / verdict` check and the gate commit each run used, and records the result as the commit
+`gate / verdict` check, the gate commit each run used and the gate's comment on the pull request, and records the result as the commit
 status `aifactory/canary` on that gate commit. `@v0` moves only after a green canary on the same
 commit. See the gate's README, Release.
 
