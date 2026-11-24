@@ -21,8 +21,9 @@ jobs:
       test-command: npm test
       # canary/ai-values-missing turns the AI review on and leaves its values empty, as a caller
       # edited by hand would. canary/ai-review turns it fully on with the values in this
-      # repository's variables (no secrets: GitHub OIDC and a review identity in itm8's tenant).
-      ai-review: ${{ github.head_ref == 'canary/ai-values-missing' || github.head_ref == 'canary/ai-review' }}
+      # repository's variables (no secrets: GitHub OIDC and a review identity in itm8's tenant),
+      # once they are set; until then it is a second clean change.
+      ai-review: ${{ github.head_ref == 'canary/ai-values-missing' || (github.head_ref == 'canary/ai-review' && vars.AIFACTORY_AZURE_CLIENT_ID != '') }}
       review-endpoint: ${{ github.head_ref == 'canary/ai-review' && vars.AIFACTORY_REVIEW_ENDPOINT || '' }}
       azure-client-id: ${{ github.head_ref == 'canary/ai-review' && vars.AIFACTORY_AZURE_CLIENT_ID || '' }}
       azure-tenant-id: ${{ github.head_ref == 'canary/ai-review' && vars.AIFACTORY_AZURE_TENANT_ID || '' }}
