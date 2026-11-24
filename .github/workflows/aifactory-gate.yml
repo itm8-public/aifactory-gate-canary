@@ -1,0 +1,29 @@
+# The aifactory gate canary. Every fixture pull request runs the real reusable workflow at @v0-next.
+# scripts/canary.mjs in itm8-public/aifactory-gate pushes an empty commit to each fixture branch and
+# compares the verdicts with the expected ones before @v0 may move. Synthetic content only.
+name: aifactory gate
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write # the gate signs in to itm8's review Foundry with GitHub OIDC when ai-review is on
+
+jobs:
+  gate:
+    uses: itm8-public/aifactory-gate/.github/workflows/gate.yml@v0-next
+    with:
+      zone: green
+      level: 2
+      node-version: '24'
+      test-command: npm test
+      # canary/ai-values-missing turns the AI review on and leaves its values empty, as a caller
+      # edited by hand would. canary/ai-review turns it fully on with the values in this
+      # repository's variables (no secrets: GitHub OIDC and a review identity in itm8's tenant).
+      ai-review: ${{ github.head_ref == 'canary/ai-values-missing' || github.head_ref == 'canary/ai-review' }}
+      review-endpoint: ${{ github.head_ref == 'canary/ai-review' && vars.AIFACTORY_REVIEW_ENDPOINT || '' }}
+      azure-client-id: ${{ github.head_ref == 'canary/ai-review' && vars.AIFACTORY_AZURE_CLIENT_ID || '' }}
+      azure-tenant-id: ${{ github.head_ref == 'canary/ai-review' && vars.AIFACTORY_AZURE_TENANT_ID || '' }}
+      review-token-scope: ${{ vars.AIFACTORY_REVIEW_TOKEN_SCOPE || 'https://cognitiveservices.azure.com/.default' }}

@@ -1,0 +1,11 @@
+{
+  "name": "aifactory-gate-canary",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Synthetic canary for the itm8 AI Factory gate. No real code, data or credentials.",
+  "scripts": {
+    "test": "node --test"
+  },
+  "license": "MIT"
+}
