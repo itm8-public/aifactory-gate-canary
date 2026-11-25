@@ -1,21 +1,19 @@
-# The aifactory gate canary. Every fixture pull request runs the real reusable workflow at @v0-next.
-# scripts/canary.mjs in itm8-public/aifactory-gate pushes an empty commit to each fixture branch and
-# compares the verdicts with the expected ones before @v0 may move. Synthetic content only.
+# Check for 0.5.0: a caller that grants only what the customer template granted before 0.5.0
+# (contents: read, id-token: write; no actions: read, no pull-requests: write), as Oral Care's does.
+# GitHub must start the gate, the verdict must be pass, a push runs in full (no reuse) and the
+# comment job must not fail. The pull request goes into canary-legacy/base, so its change is one
+# README line and not this file.
 name: aifactory gate
 
 on:
   pull_request:
-    branches: [main]
-  # scripts/canary.mjs pushes a merge commit of canary/describes-review here, as a merge to main
-  # would push it. That push run must reuse the pull request run's verdict.
+    branches: [main, 'canary-legacy/base']
   push:
     branches: ['canary-push/**']
 
 permissions:
   contents: read
   id-token: write # the gate signs in to itm8's review Foundry with GitHub OIDC when ai-review is on
-  actions: read # a push reuses the verdict of the pull request run that judged the same change
-  pull-requests: write # the gate posts its result on the pull request
 
 jobs:
   gate:
@@ -25,13 +23,4 @@ jobs:
       level: 2
       node-version: '24'
       test-command: npm test
-      # canary/ai-values-missing turns the AI review on and leaves its values empty, as a caller
-      # edited by hand would. canary/ai-review and canary/describes-review (and the push of its
-      # merge, which must get the same inputs) turn it fully on with the values in this
-      # repository's variables (no secrets: GitHub OIDC and a review identity in itm8's tenant),
-      # once they are set; until then they are clean changes.
-      ai-review: ${{ github.head_ref == 'canary/ai-values-missing' || (contains(fromJSON('["canary/ai-review","canary/describes-review","canary-push/describes-review"]'), github.head_ref || github.ref_name) && vars.AIFACTORY_AZURE_CLIENT_ID != '') }}
-      review-endpoint: ${{ contains(fromJSON('["canary/ai-review","canary/describes-review","canary-push/describes-review"]'), github.head_ref || github.ref_name) && vars.AIFACTORY_REVIEW_ENDPOINT || '' }}
-      azure-client-id: ${{ contains(fromJSON('["canary/ai-review","canary/describes-review","canary-push/describes-review"]'), github.head_ref || github.ref_name) && vars.AIFACTORY_AZURE_CLIENT_ID || '' }}
-      azure-tenant-id: ${{ contains(fromJSON('["canary/ai-review","canary/describes-review","canary-push/describes-review"]'), github.head_ref || github.ref_name) && vars.AIFACTORY_AZURE_TENANT_ID || '' }}
-      review-token-scope: ${{ vars.AIFACTORY_REVIEW_TOKEN_SCOPE || 'https://cognitiveservices.azure.com/.default' }}
+      ai-review: false
