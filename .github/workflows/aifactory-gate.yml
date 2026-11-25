@@ -2,7 +2,8 @@
 # that grants only what the customer template granted before gate 0.5.0 (contents: read,
 # id-token: write; no actions: read, no pull-requests: write), as callers that predate it still do.
 # GitHub must start the gate, the verdict must be pass with no comment, no gate job may fail, and
-# the push of its merge to canary-push/legacy must run in full (no reuse without actions: read).
+# the push of its squash to canary-push/legacy must run in full, as every push of such a caller does
+# in a private repository (here, a public one, a merge commit would reuse the verdict).
 # The pull request goes into canary-legacy/base, which holds this caller, so the case's change is
 # one README line and not this file. Do not merge or delete these branches.
 name: aifactory gate
