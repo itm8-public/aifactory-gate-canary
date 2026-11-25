@@ -46,6 +46,15 @@ of that pull request (the tree the run judged, on the base it judged it against)
 pull request run's verdict instead of running again. The `canary-push/` branches are written by the
 canary only and moved with force on every run.
 
+## How a change here is checked
+
+`.github/workflows/aifactory-gate.yml` is the itm8 AI Factory gate (zone green, level 2): on every
+pull request it runs the tests, a secret scan, static analysis and a dependency scan, and gives a
+verdict of pass, fail or needs-person. itm8 clears needs-person verdicts. The AI review is on for
+some cases: it reads only the changed code (sent to itm8's review Foundry, EU Data Zone) and never
+blocks on its own without evidence. The gate's comment on the pull request says who acts, why, and
+how to fix what it found.
+
 ## How it runs
 
 A gate maintainer runs `node scripts/canary.mjs` from a clone of the gate repository, signed in
