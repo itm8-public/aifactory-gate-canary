@@ -43,3 +43,5 @@ commit. See the gate's README, Release.
 
 Do not merge the pull requests or delete the branches. To change a case, open a pull request in
 the gate repository for `scripts/canary.mjs` and change the branch here to match.
+
+A line for the check of a caller with the permissions granted before 0.5.0.
