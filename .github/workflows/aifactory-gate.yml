@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   gate:
-    uses: itm8-public/aifactory-gate/.github/workflows/gate.yml@v0-next
+    uses: itm8-public/aifactory-gate/.github/workflows/gate.yml@v0
     with:
       zone: green
       level: 2
