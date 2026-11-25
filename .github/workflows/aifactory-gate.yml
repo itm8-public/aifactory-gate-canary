@@ -1,8 +1,10 @@
-# Check for 0.5.0: a caller that grants only what the customer template granted before 0.5.0
-# (contents: read, id-token: write; no actions: read, no pull-requests: write), as Oral Care's does.
-# GitHub must start the gate, the verdict must be pass, a push runs in full (no reuse) and the
-# comment job must not fail. The pull request goes into canary-legacy/base, so its change is one
-# README line and not this file.
+# The canary case canary-legacy/case (scripts/canary.mjs in itm8-public/aifactory-gate): a caller
+# that grants only what the customer template granted before gate 0.5.0 (contents: read,
+# id-token: write; no actions: read, no pull-requests: write), as callers that predate it still do.
+# GitHub must start the gate, the verdict must be pass with no comment, no gate job may fail, and
+# the push of its merge to canary-push/legacy must run in full (no reuse without actions: read).
+# The pull request goes into canary-legacy/base, which holds this caller, so the case's change is
+# one README line and not this file. Do not merge or delete these branches.
 name: aifactory gate
 
 on:
