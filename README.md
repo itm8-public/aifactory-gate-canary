@@ -10,7 +10,7 @@ repository give the expected verdict for each known case.
 ## The cases
 
 Each case is a branch with one commit on top of `main`, and an open **draft** pull request into
-`main`. The pull requests are never merged.
+`main` (the legacy case goes into a base of its own, below). The pull requests are never merged.
 
 | Branch                     | Change                                     | Expected verdict                                     |
 | -------------------------- | ------------------------------------------ | ---------------------------------------------------- |
@@ -20,11 +20,22 @@ Each case is a branch with one commit on top of `main`, and an open **draft** pu
 | `canary/ai-values-missing` | A clean change; the AI review on, values empty | `needs-person` (the AI review values are missing) |
 | `canary/ai-review`         | A clean change; the AI review fully on     | `pass` with the "In plain words" explanation (only when this repository's AI review variables are set) |
 | `canary/describes-review`  | A README section that explains the gate and the AI review; the AI review fully on | `pass`: describing the review is not steering it. Then its merge is pushed (below) |
+| `canary-legacy/case`       | One README line, into `canary-legacy/base`; that base's caller grants only `contents: read` and `id-token: write` | `pass`, no comment, no gate job fails. Then its merge is pushed and must run in full (below) |
 
 The caller is [`.github/workflows/aifactory-gate.yml`](.github/workflows/aifactory-gate.yml). It
 calls `gate.yml@v0-next` on zone green, level 2, and turns the AI review on by branch name. It
 grants `actions: read` (a push reuses a pull request's verdict) and `pull-requests: write` (the
 gate's comment on the pull request).
+
+**The legacy caller.** `canary-legacy/base` holds a caller that grants only what the customer
+template granted before gate 0.5.0 (`contents: read`, `id-token: write`), as callers that predate
+it still do. GitHub does not start a called workflow whose job asks for more than the caller
+grants, so this case fails as soon as a gate release asks for a permission those callers lack. Its
+pull request goes into `canary-legacy/base`, so the change it judges is one README line, not the
+caller. After its run, the canary pushes a merge commit of it to `canary-push/legacy`: without
+`actions: read` that push cannot reuse the pull request's verdict, so it must run in full and
+pass. To change the legacy caller, commit to `canary-legacy/base` and merge it into
+`canary-legacy/case`.
 
 **The push of a merge.** After the `canary/describes-review` run, the canary pushes a merge commit
 of that pull request (the tree the run judged, on the base it judged it against) to
